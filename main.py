@@ -40,7 +40,7 @@ def Home():
             lines=list(reader)
         st.table(lines)
     except UnboundLocalError:
-        st.warning("File is empty")
+        st.warning("No record Found")
     except FileNotFoundError:
         st.warning("File is not there")
             
