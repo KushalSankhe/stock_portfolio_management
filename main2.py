@@ -10,9 +10,7 @@ import time
 date=time.strftime("%Y-%m-%d")
 
 
-
-
-st.title("Stock Portfolio Management")
+st.title("Stock Portfolio Management",anchor=False)
 
 with st.sidebar:
     selected = option_menu("Main Menu", ["Your Portfolio", 'Add Stocks','Remove Entries','history'], 
@@ -21,20 +19,34 @@ with st.sidebar:
 
 def Home():
     try:
+        #read file and appending latest value of stock
         df = pd.read_csv('port.csv')
         if df.empty:
             st.warning("No data in file")
             return
         for i, row in df.iterrows():
             tk_name = row['Ticker Name']
-            cureent_value = yf.download(tk_name, period='1d')['Close'].iloc[-1]
-            cureent_value=round(cureent_value,2)
-            df.at[i, 'Current Value'] = cureent_value
-            df.at[i, 'Total Current Value'] = round(cureent_value * row['Quantity'], 2)
+            current_value = yf.download(tk_name, period='1d')['Close'].iloc[-1]
+            current_value = round(current_value, 2)
+            df.at[i, 'Current Value'] = current_value
+            df.at[i, 'Total Current Value'] = round(current_value * row['Quantity'], 2)
             df.at[i, 'Profit/Loss'] = round(df.at[i, 'Total Current Value'] - row['Total Cost'], 2)
         df['Price'] = df['Price'].apply(lambda x: round(x, 2))
         df['Total Cost'] = df['Total Cost'].apply(lambda x: round(x, 2))
-        st.table(df.style.applymap(lambda x: 'background-color: %s' % ('green' if x > 0 else 'red'), subset=['Profit/Loss']))
+
+
+
+        #Calculate and display status of overall portfolio
+        total_invested = sum(df["Total Cost"].tolist())
+        total_current = sum(df["Profit/Loss"].tolist())
+
+        status = lambda x: ":red[Current Value:"+str(x)+"]" if float(x) < 0 else ":green[Current Value:"+str(x)+"]"
+
+        c1,c2 = st.columns(2)
+        c1.subheader(":green[Invested Value :  "+str(total_invested)+"]",anchor=False)
+        c2.subheader(status(total_current),anchor=False)
+        st.table(df.style.applymap(lambda x: 'background-color: %s' % ('green' if x > 0 else 'red'), subset=['Profit/Loss'])) 
+        
     except FileNotFoundError:
         st.warning("File not found")
     #     st.table(df)
@@ -57,7 +69,7 @@ def AddStock():
         st.warning("Please enter a valid ticker symbol")
         return
     
-    cureent_value = yf.download(tk_name, start=date)
+    cureent_value = yf.download(tk_name, period="1d")
     
     # if cureent_value.empty:
     #     st.warning(f"No data found for ticker symbol {tk_name}")
