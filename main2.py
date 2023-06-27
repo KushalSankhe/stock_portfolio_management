@@ -69,13 +69,10 @@ def AddStock():
         st.warning("Please enter a valid ticker symbol")
         return
     
-    cureent_value = yf.download(tk_name, period="1d")
     
-    # if cureent_value.empty:
-    #     st.warning(f"No data found for ticker symbol {tk_name}")
-    #     return
     
-    cv = cureent_value['Close'].iloc[-1]
+
+    cv = yf.download(tk_name, start=date)['Close'].iloc[-1]
     current_total=cv*quanty
 
     if(current_total>tc):
@@ -84,8 +81,14 @@ def AddStock():
         status="Loss"
     else:
         status="No change"
-    df = pd.DataFrame([[name,tk_name, price, quanty, tc, cv,current_total,status]])
-    df.columns = ['Stock Name','Ticker Name', 'Price', 'Quantity', 'Total Cost', 'Current Value','Total Current Value','status']
+    
+    # #adding a new column name 'sector' which shows sector name 
+    sector=yf.Ticker(tk_name)
+    sector=sector.info['industry']
+    df = pd.DataFrame([[name,tk_name,sector, price, quanty, tc, cv,current_total,status]])
+
+    
+    df.columns = ['Stock Name','Ticker Name','sector', 'Price', 'Quantity', 'Total Cost', 'Current Value','Total Current Value','status']
     
     if st.button("Submit"):
         if os.path.isfile('port.csv'):
@@ -96,17 +99,6 @@ def AddStock():
         st.success("The data is entered in the file")
 
 
-# def RemoveEntry():
-#     st.title("Remove Stocks from different Portfolio")
-
-#     name=st.text_input("Enter the name of the stock You want to remove: ")
-#     if(st.button("Submit")):
-#         with open('port.csv','r')as source:
-#             reader=csv.reader(source)
-#         with open('port.csv','w')as result:
-#             writer=csv.writer(result)
-#             for i in reader:
-#                 writer.writerow((reader[i]==name))
 
 def RemoveEntry():
     st.title("Remove Stocks from different Portfolio")
