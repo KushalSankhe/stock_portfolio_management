@@ -1,11 +1,10 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 import pandas as pd
 import os
 import yfinance as yf
 import time
 
-date=time.strftime("%Y-%m-%d")
+date = time.strftime("%Y-%m-%d")
 
 def AddStock():
     st.title("Add Stocks")
@@ -14,29 +13,39 @@ def AddStock():
     tk_name = st.text_input("Enter Ticker Name of stock")
     tk_name = tk_name.upper()
     price = st.number_input("Enter the price at which you buy the stock: ")
-    price=round(price,2)
-    quanty = int(st.number_input("Quantity of the stock: "))
-    tc = int(price * quanty)
-    
+    price = round(price, 2)
+    quantity = int(st.number_input("Quantity of the stock: "))
+    total_cost = int(price * quantity)
+
     if not tk_name:
         st.warning("Please enter a valid ticker symbol")
         return
-    
-    cureent_value = yf.download(tk_name, period='1d')
 
-    
-    cv = cureent_value['Close'].iloc[-1]
-    current_total=cv*quanty
+    current_value = yf.download(tk_name, period='1d')
+    current_price = current_value['Close'].iloc[-1]
+    current_total = current_price * quantity
 
-    if(current_total>tc):
-        status="Profit"
-    elif(current_total<tc):
-        status="Loss"
+    if current_total > total_cost:
+        status = "Profit"
+    elif current_total < total_cost:
+        status = "Loss"
     else:
-        status="No change"
-    df = pd.DataFrame([[name,tk_name, price, quanty, tc, cv,current_total,status]])
-    df.columns = ['Stock Name','Ticker Name', 'Price', 'Quantity', 'Total Cost', 'Current Value','Total Current Value','status']
-    
+        status = "No change"
+
+    # Load existing data from file if it exists
+    if os.path.isfile('port.csv'):
+        data = pd.read_csv('port.csv')
+        last_id = data['ID'].max() if 'ID' in data.columns else 0
+        next_id = last_id + 1
+    else:
+        next_id = 1
+
+    df = pd.DataFrame(
+        [[next_id, name, tk_name, price, quantity, total_cost, current_price, current_total, status]],
+        columns=['ID', 'Stock Name', 'Ticker Name', 'Price', 'Quantity', 'Total Cost', 'Current Price',
+                 'Current Total', 'Status']
+    )
+
     if st.button("Submit"):
         if os.path.isfile('port.csv'):
             df.to_csv("port.csv", mode="a", index=False, header=False)
