@@ -17,24 +17,8 @@ with st.sidebar:
     selected
 
 def Home():
-    # try:
-    #     pass
-    # except UnboundLocalError:
-    #     st.warning("File is empty try adding some data")
-    # if UnboundLocalError:
-    #     st.warning("File is empty try adding some data")
-    # else:
-    #     with open('port.csv','r')as f:
-    #         a=f.readlines()
-    #     st.table(a)
-    #     print(a)
 
     try:
-        # with open('port.csv','r')as f:
-        #     a=f.readlines()
-        # f=['stock name','price','quantity','total price']
-        # st.table(a)
-        # print(a)
         with open('port.csv', 'r') as f:
             reader = csv.reader(f)
             lines=list(reader)
@@ -65,18 +49,6 @@ def AddStock():
         st.success("The data is entered in the file")
 
 
-# def RemoveEntry():
-#     st.title("Remove Stocks from different Portfolio")
-
-#     name=st.text_input("Enter the name of the stock You want to remove: ")
-#     if(st.button("Submit")):
-#         with open('port.csv','r')as source:
-#             reader=csv.reader(source)
-#         with open('port.csv','w')as result:
-#             writer=csv.writer(result)
-#             for i in reader:
-#                 writer.writerow((reader[i]==name))
-
 def RemoveEntry():
     st.title("Remove Stocks from different Portfolio")
 
@@ -90,7 +62,7 @@ def RemoveEntry():
             for row in rows:
                 if row[0] != name:
                     writer.writerow(row)
-        st.success(f"{name} has been removed from the file.")
+                    st.success(f"{name} has been removed from the file.")
 
 if (selected=="Add Stocks"):
     AddStock()
